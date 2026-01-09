@@ -1,0 +1,13 @@
+#Input data (NCERT PDFs)
+data/
+
+#Generated outputs
+output/
+
+#Python cache
+__pycache__/
+*.pyc
+
+#Virtual environment
+venv/
+.env/
