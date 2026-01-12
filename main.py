@@ -18,7 +18,6 @@ def extract_images_and_captions(pdf_name):
     for page_num in range(len(doc)):
         page = doc[page_num]
 
-        # ---- 1. Collect all images with their bounding boxes ----
         image_entries = []
         for img in page.get_images(full=True):
             xref = img[0]
@@ -26,31 +25,27 @@ def extract_images_and_captions(pdf_name):
                 bbox = page.get_image_bbox(img)
                 image_entries.append((xref, bbox))
             except:
-                continue  # skip broken metadata safely
+                continue 
 
         if not image_entries:
             continue
 
-        # ---- 2. Find caption blocks ----
         text_blocks = page.get_text("blocks")
         captions = [
             block for block in text_blocks
             if block[4].strip().lower().startswith("fig.")
         ]
 
-        # ---- 3. Match images above each caption ----
         for cap_idx, cap in enumerate(captions):
-            cap_top = cap[1]  # y-coordinate of caption top
+            cap_top = cap[1] 
             related_images = []
 
             for xref, bbox in image_entries:
                 vertical_gap = cap_top - bbox.y1
 
-                # image must be just above caption (tight window)
                 if 0 < vertical_gap < 25:
                     pix = fitz.Pixmap(doc, xref)
 
-                    # ABSOLUTE RULE: always re-render to RGB
                     pix_rgb = fitz.Pixmap(fitz.csRGB, pix)
 
                     img_name = (
@@ -61,7 +56,6 @@ def extract_images_and_captions(pdf_name):
 
                     pix_rgb.save(img_path)
 
-                    # explicit cleanup
                     pix = None
                     pix_rgb = None
 
